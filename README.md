@@ -1,2 +1,2 @@
 # CMSE830
-Repository for class
+Repository for class homework
