@@ -20,7 +20,7 @@ import time
 # Load the data
 @st.cache_data
 def load_data():
-    url = "https://raw.githubusercontent.com/andandandand/CSV-datasets/master/plane_crashes_data.csv"
+    url = "https://raw.githubusercontent.com/Diparna/CMSE830/refs/heads/main/appended_plane_crash_data.csv?token=GHSAT0AAAAAACY56DOQKCQZBOO7UTLVYC3SZYQPCJQ"
     df = pd.read_csv(url)
     df['year'] = pd.to_numeric(df['year'], errors='coerce')
     #df = df.dropna(subset=['year'])
@@ -55,6 +55,22 @@ year_range = st.sidebar.slider("Select Year Range",
 st.sidebar.markdown("<br>" * 7, unsafe_allow_html=True)
 st.sidebar.subheader("GitHub Repository")
 st.sidebar.markdown("[View the source code on GitHub](https://github.com/Diparna/CMSE830)", unsafe_allow_html=True)
+
+def clean_locations(df):
+    # Replace the ellipsis and any other special characters
+    if 'location' in df.columns:
+        # Remove ellipsis and other special characters
+        df['location'] = df['location'].str.replace('…', '')
+        df['location'] = df['location'].str.replace(',', '')
+        # Strip any leading/trailing whitespace
+        df['location'] = df['location'].str.strip()
+        # Replace empty strings with NaN
+        df['location'] = df['location'].replace('', pd.NA)
+    
+    return df
+
+df = clean_locations(df)
+
 
 # Filter data based on year range
 filtered_df = df[(df['year'] >= year_range[0]) & (df['year'] <= year_range[1])]
@@ -203,7 +219,7 @@ elif page == "Initial Data Analysis":
 elif page == "Exploratory Data Analysis":
     st.title("Exploratory Data Analysis")
     st.markdown("This page shows various things that were done for Exploratory Data Analysis(EDA) of the dataset.")
-    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Temporal Trends", "Fatality Analysis", "Operator and Aircraft Analysis", "Geographical Analysis", "Correlation Analysis", "Text Analysis"])
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Temporal Trends", "Fatality Analysis", "Operator and Aircraft Analysis", "Geographical Analysis", "Correlation Analysis", "Word Map"])
     
     with tab1:
         st.header("Temporal Trends")
@@ -225,7 +241,7 @@ elif page == "Exploratory Data Analysis":
     with tab4:
         st.header("Geographical Analysis")
         top_locations = filtered_df['location'].value_counts().nlargest(10)
-        fig = px.bar(top_locations, x=top_locations.index, y=top_locations.values, title='Top 10 Locations with Most Crashes')
+        fig = px.bar(top_locations, x=top_locations.index, y=top_locations.values, title='Top 10 Locations with Most Crashes', labels={'x': 'Location', 'y': 'Number of Crashes'})
         st.plotly_chart(fig)
     
     with tab5:
@@ -235,9 +251,9 @@ elif page == "Exploratory Data Analysis":
         st.plotly_chart(fig)
     
     with tab6:
-        st.header("Text Analysis")
-        st.markdown("This is a rough word map made from location data to try and make the common locations easier to notice.")
-        text = ' '.join(filtered_df['location'].dropna())
+        st.header("Word Map")
+        st.markdown("This is a rough word map made from location data to try and make the common countries easier to notice.")
+        text = ' '.join(filtered_df['country'].dropna())
         wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text)
         fig, ax = plt.subplots(figsize=(10, 5))
         ax.imshow(wordcloud, interpolation='bilinear')
@@ -312,8 +328,17 @@ elif page == "Location Analysis":
             location_freq[loc] += 1
         else:
             location_freq[loc] = 1
+
+     # Prepare country data
+    countries = filtered_df['country'].dropna().tolist()
+    country_freq = {}
+    for loc in countries:
+        if loc in country_freq:
+            country_freq[loc] += 1
+        else:
+            country_freq[loc] = 1
     
-    # Generate word cloud
+    # Generate word cloud for locations
     wordcloud = WordCloud(width=800, height=400, background_color='white').generate_from_frequencies(location_freq)
 
     fig, ax = plt.subplots(figsize=(10, 5))
@@ -327,6 +352,22 @@ elif page == "Location Analysis":
     fig_locations = px.bar(x=top_locations.index, y=top_locations.values, 
                            title='Top 10 Locations with Most Crashes', labels={'x': 'Location', 'y': 'Count of Crashes'})
     st.plotly_chart(fig_locations)
+
+
+    # Generate word cloud for locations
+    wordcloud = WordCloud(width=800, height=400, background_color='white').generate_from_frequencies(country_freq)
+
+    fig, ax = plt.subplots(figsize=(10, 5))
+    ax.imshow(wordcloud, interpolation='bilinear')
+    ax.axis('off')
+    st.pyplot(fig)
+
+    # Display top countries
+    st.subheader("Top 10 Crash Countries")
+    top_countries = pd.Series(country_freq).nlargest(10)
+    fig_countries = px.bar(x=top_countries.index, y=top_countries.values, 
+                           title='Top 10 Locations with Most Crashes', labels={'x': 'Location', 'y': 'Count of Crashes'})
+    st.plotly_chart(fig_countries)
 
 elif page == "Animation Analysis":
      st.title("Animated Analysis of Plane Crashes")
