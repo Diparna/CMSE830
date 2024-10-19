@@ -131,39 +131,49 @@ elif page == "Missing Data Analysis":
     st.markdown("This is a for trying various imputation methods. I have used only simple imputer(I felt like there's no need to go for advanced imputation for my project.).The error pops up when there's nothing selected in the columns section. All the imputation do not work for all the columns. The Most Frequent work on both numeric and text based data.")
     imputation_method = st.selectbox("Select imputation method", ["Mean", "Median", "Most Frequent", "Constant"])
     columns_to_impute = st.multiselect("Select columns to impute", filtered_df.columns)
-    
-    if st.button("Perform Imputation"):
-      if imputation_method == "Mean":
-        imputer = SimpleImputer(strategy='mean')
-      elif imputation_method == "Median":
-        imputer = SimpleImputer(strategy='median')
-      elif imputation_method == "Most Frequent":
-        imputer = SimpleImputer(strategy='most_frequent')
-      else:  # Constant
-        constant_value = st.text_input("Enter constant value for imputation", "0")
-        imputer = SimpleImputer(strategy='constant', fill_value=constant_value)
+    try:
+        if len(columns_to_impute) == 0:
+            st.error("Please select at least one column to impute!")
+        else:
+            if st.button("Perform Imputation"):
+                if imputation_method == "Mean":
+                    imputer = SimpleImputer(strategy='mean')
+                elif imputation_method == "Median":
+                    imputer = SimpleImputer(strategy='median')
+                elif imputation_method == "Most Frequent":
+                    imputer = SimpleImputer(strategy='most_frequent')
+                else:  # Constant
+                    constant_value = st.text_input("Enter constant value for imputation", "0")
+                    imputer = SimpleImputer(strategy='constant', fill_value=constant_value)
         
-    filtered_df_imputed = filtered_df.copy()
-    filtered_df_imputed[columns_to_impute] = imputer.fit_transform(filtered_df[columns_to_impute])
+            filtered_df_imputed = filtered_df.copy()
+            filtered_df_imputed[columns_to_impute] = imputer.fit_transform(filtered_df[columns_to_impute])
         
-    st.write("Data after imputation:")
-    st.write(filtered_df_imputed[columns_to_impute].head())
-
-    # Display the existing data
-
-    st.header("Missing Data Overview Before Imputation")
-    missing_data = filtered_df.isnull().sum().sort_values(ascending=False)
-    missing_percent = 100 * filtered_df.isnull().sum() / len(filtered_df)
-    missing_table = pd.concat([missing_data, missing_percent], axis=1, keys=['Missing Values', 'Percentage'])
-    st.write(missing_table)
-
-    # Update missing data information after imputation
-    st.header("Missing Data Overview After Imputation")
-    missing_data_after = filtered_df_imputed.isnull().sum().sort_values(ascending=False)
-    missing_percent_after = 100 * filtered_df_imputed.isnull().sum() / len(filtered_df_imputed)
-    missing_table_after = pd.concat([missing_data_after, missing_percent_after], axis=1, keys=['Missing Values', 'Percentage'])
-    st.write(missing_table_after)
+            st.write("Data after imputation:")
+            st.write(filtered_df_imputed[columns_to_impute].head())
     
+            # Display the existing data
+
+            st.header("Missing Data Overview Before Imputation")
+            missing_data = filtered_df.isnull().sum().sort_values(ascending=False)
+            missing_percent = 100 * filtered_df.isnull().sum() / len(filtered_df)
+            missing_table = pd.concat([missing_data, missing_percent], axis=1, keys=['Missing Values', 'Percentage'])
+            st.write(missing_table)
+
+            # Update missing data information after imputation
+            st.header("Missing Data Overview After Imputation")
+            missing_data_after = filtered_df_imputed.isnull().sum().sort_values(ascending=False)
+            missing_percent_after = 100 * filtered_df_imputed.isnull().sum() / len(filtered_df_imputed)
+            missing_table_after = pd.concat([missing_data_after, missing_percent_after], axis=1, keys=['Missing Values', 'Percentage'])
+            st.write(missing_table_after)
+    
+    except Exception as e:
+        st.error(f"An error occurred: {str(e)}")
+        st.info("Common errors:\n"
+            "- Mean and Median imputation only work with numeric data\n"
+            "- Make sure the selected columns contain valid data for the chosen imputation method\n"
+            "- You have not clicked on Perform Imputation!")
+
 elif page == "Initial Data Analysis":
     st.title("Initial Data Analysis")
     
