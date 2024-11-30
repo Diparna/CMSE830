@@ -239,32 +239,26 @@ elif page == "Initial Data Analysis":
 elif page == "Exploratory Data Analysis":
     st.title("Exploratory Data Analysis")
     st.markdown("This page shows various things that were done for Exploratory Data Analysis(EDA) of the dataset. I did an analysis on most of the categories I could think of such as Operators, Aircrafts, Common Locations and Number of people who died in the crash.")
-    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Temporal Trends", "Fatality Analysis", "Operator and Aircraft Analysis", "Geographical Analysis", "Correlation Analysis", "Word Map"])
-    
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["Fatality Analysis", "Operator and Aircraft Analysis", "Geographical Analysis", "Correlation Analysis", "Word Map"])
+      
     with tab1:
-        st.header("Temporal Trends")
-        crashes_by_year = filtered_df.groupby('year').size().reset_index(name='Count')
-        fig = px.line(crashes_by_year, x='year', y='Count', title='Number of Crashes per Year')
-        st.plotly_chart(fig)
-    
-    with tab2:
         st.header("Fatality Analysis")
         fig = px.scatter(filtered_df, x="aboard", y="fatalities", title="Fatalities vs People Aboard")
         st.plotly_chart(fig)
     
-    with tab3:
+    with tab2:
         st.header("Operator and Aircraft Analysis")
         top_operators = filtered_df['operator'].value_counts().nlargest(10)
         fig = px.bar(top_operators, x=top_operators.index, y=top_operators.values, title='Top 10 Operators with Most Crashes')
         st.plotly_chart(fig)
     
-    with tab4:
+    with tab3:
         st.header("Geographical Analysis")
         top_locations = filtered_df['location'].value_counts().nlargest(10)
         fig = px.bar(top_locations, x=top_locations.index, y=top_locations.values, title='Top 10 Locations with Most Crashes', labels={'x': 'Location', 'y': 'Number of Crashes'})
         st.plotly_chart(fig)
     
-    with tab5:
+    with tab4:
         st.header("Correlation Analysis")
         st.markdown("For the correlation matrix, I tried including the other columns such as operators, countries and location but it said that it cannot convert these columns into float. So, I was not sure how to show correlation between them.")
         #corr_matrix = filtered_df[['aboard', 'fatalities', '']].corr()
@@ -274,7 +268,7 @@ elif page == "Exploratory Data Analysis":
         fig_1 = px.imshow(corr_matrix_1, text_auto=True, aspect="auto")
         st.plotly_chart(fig_1)
     
-    with tab6:
+    with tab5:
         st.header("Word Map")
         st.markdown("This is a rough word map made from location data to try and make the common countries easier to notice.")
         text = ' '.join(filtered_df['country'].dropna())
