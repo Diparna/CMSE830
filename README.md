@@ -44,3 +44,9 @@ The dataset used includes columns such as:
    git clone https://github.com/yourusername/bermuda-triangle-dashboard.git
 
 
+## 🌟 Future Enhancements
+Additional Visualizations: Introduce heatmaps or geospatial plots for better location-based analysis.
+Extended Analysis: Correlation with weather data or other factors. More data for the Bermuda Triangle.
+Improved Filtering: Add more dynamic filtering capabilities for enhanced exploration.
+
+
